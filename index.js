@@ -1,39 +1,53 @@
 const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
 const app = express();
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 
-app.use(express.json());
+app.use(bodyParser.json());
+app.use(cors());
 
-function encryptDecryptLogic(str, key, encrypt = true) {
-    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    const shiftedAlphabet = alphabet.slice(key.length) + alphabet.slice(0, key.length);
-    const cipher = encrypt ? shiftedAlphabet : alphabet;
-    const decipher = encrypt ? alphabet : shiftedAlphabet;
-
-    return str.split('').map(char => {
-        const index = cipher.indexOf(char);
-        return index !== -1 ? decipher[index] : char;
+// Simple Caesar cipher encryption function
+function caesarEncrypt(text, shift) {
+    return text.split('').map(char => {
+        const code = char.charCodeAt(0);
+        if (code >= 65 && code <= 90) { // Uppercase letters
+            return String.fromCharCode(((code - 65 + shift) % 26) + 65);
+        } else if (code >= 97 && code <= 122) { // Lowercase letters
+            return String.fromCharCode(((code - 97 + shift) % 26) + 97);
+        } else {
+            return char; // Non-alphabetic characters
+        }
     }).join('');
 }
 
+// Simple Caesar cipher decryption function
+function caesarDecrypt(text, shift) {
+    return caesarEncrypt(text, 26 - shift);
+}
+
+// Encryption endpoint
 app.post('/encrypt', (req, res) => {
     const { text, key } = req.body;
-    if (!text || !key) {
-        return res.status(400).json({ error: 'Text and key are required' });
+    const shift = parseInt(key);
+    if (!text || isNaN(shift)) {
+        return res.status(400).json({ error: 'Text and a numeric key are required.' });
     }
-    const ciphertext = encryptDecryptLogic(text, key, true);
+    const ciphertext = caesarEncrypt(text, shift);
     res.json({ ciphertext });
 });
 
+// Decryption endpoint
 app.post('/decrypt', (req, res) => {
     const { text, key } = req.body;
-    if (!text || !key) {
-        return res.status(400).json({ error: 'Text and key are required' });
+    const shift = parseInt(key);
+    if (!text || isNaN(shift)) {
+        return res.status(400).json({ error: 'Text and a numeric key are required.' });
     }
-    const plaintext = encryptDecryptLogic(text, key, false);
+    const plaintext = caesarDecrypt(text, shift);
     res.json({ plaintext });
 });
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
 });
