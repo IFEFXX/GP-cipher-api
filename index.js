@@ -7,26 +7,26 @@ const port = process.env.PORT || 3000;
 app.use(bodyParser.json());
 app.use(cors());
 
-// Simple Caesar cipher encryption function
+// GP API ENCRYPTION LOGIC 
 function caesarEncrypt(text, shift) {
     return text.split('').map(char => {
         const code = char.charCodeAt(0);
-        if (code >= 65 && code <= 90) { // Uppercase letters
+        if (code >= 65 && code <= 90) { 
             return String.fromCharCode(((code - 65 + shift) % 26) + 65);
-        } else if (code >= 97 && code <= 122) { // Lowercase letters
+        } else if (code >= 97 && code <= 122) { 
             return String.fromCharCode(((code - 97 + shift) % 26) + 97);
         } else {
-            return char; // Non-alphabetic characters
+            return char; 
         }
     }).join('');
 }
 
-// Simple Caesar cipher decryption function
+// GP API DECRYPTION LOGIC
 function caesarDecrypt(text, shift) {
     return caesarEncrypt(text, 26 - shift);
 }
 
-// Encryption endpoint
+// GP API ENCRYPTION ENDPOINT
 app.post('/encrypt', (req, res) => {
     const { text, key } = req.body;
     const shift = parseInt(key);
@@ -37,7 +37,7 @@ app.post('/encrypt', (req, res) => {
     res.json({ ciphertext });
 });
 
-// Decryption endpoint
+// GP API DECRYPTION ENDPOINT
 app.post('/decrypt', (req, res) => {
     const { text, key } = req.body;
     const shift = parseInt(key);
